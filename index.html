@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lubricentro Maxi · Stock y Trazabilidad</title>
+<style>
+:root{--bg:#121417;--panel:#1b1e23;--panel2:#242830;--line:#2f343d;--tx:#eceef1;--mut:#9aa2ae;--acc:#f5b301;--acc2:#ffcf4d;--ok:#3fbf7f;--warn:#f5a623;--bad:#ef5350;--info:#4aa3ff;--r:10px}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+nav{background:var(--panel);border-right:1px solid var(--line);padding:14px 10px;position:sticky;top:0;height:100vh;overflow:auto;display:flex;flex-direction:column;gap:2px}
+.brand{display:flex;gap:10px;align-items:center;padding:6px 8px 16px}
+.brand .logo{width:38px;height:38px;border-radius:9px;background:var(--acc);color:#111;display:grid;place-items:center;font-weight:900;font-size:18px}
+.brand b{display:block;font-size:15px}.brand small{color:var(--mut)}
+nav a{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:8px;color:var(--mut);text-decoration:none;cursor:pointer}
+nav a:hover{background:var(--panel2);color:var(--tx)}
+nav a.on{background:var(--acc);color:#111;font-weight:700}
+nav .cnt{background:var(--bad);color:#fff;border-radius:99px;font-size:11px;padding:1px 7px;font-weight:700}
+nav .sp{flex:1}
+.credits{font-size:11px;color:var(--mut);padding:10px 8px;border-top:1px solid var(--line);line-height:1.5}
+.credits b{color:var(--acc)}
+main{padding:22px 26px;min-width:0}
+h1{font-size:22px;margin:0 0 4px}.sub{color:var(--mut);margin:0 0 18px}
+h2{font-size:15px;margin:0 0 10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:16px}
+.grid{display:grid;gap:14px}.g4{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}.g2{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.kpi small{color:var(--mut);display:block}.kpi b{font-size:24px}
+.kpi.bad b{color:var(--bad)}.kpi.warn b{color:var(--warn)}.kpi.ok b{color:var(--ok)}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.bar .sp{flex:1}
+input,select,textarea{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--acc);outline-offset:-1px}
+input[type=checkbox]{width:auto}
+.btn{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 14px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--acc)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#111;font-weight:700}
+.btn.pri:hover{background:var(--acc2)}
+.btn.danger{color:var(--bad)}.btn.sm{padding:4px 9px;font-size:12px}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);text-align:left;padding:8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:hover td{background:#20242b}
+.tbl .r{text-align:right}.tbl .act{white-space:nowrap;text-align:right}
+.wrap{overflow-x:auto}
+.badge{display:inline-block;border-radius:99px;padding:1px 9px;font-size:11px;font-weight:700;border:1px solid}
+.b-ok{color:var(--ok);border-color:var(--ok)}.b-warn{color:var(--warn);border-color:var(--warn)}.b-bad{color:var(--bad);border-color:var(--bad)}.b-info{color:var(--info);border-color:var(--info)}.b-mut{color:var(--mut);border-color:var(--line)}
+.tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:8px 14px;color:var(--mut);cursor:pointer}
+.tabs button.on{color:var(--acc);border-color:var(--acc);font-weight:700}
+.mut{color:var(--mut)}.small{font-size:12px}
+.empty{padding:26px;text-align:center;color:var(--mut)}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--mut)}
+.form label.full{grid-column:1/-1}
+.form label.chk{flex-direction:row;align-items:center;gap:8px;color:var(--tx)}
+dialog{background:var(--panel);color:var(--tx);border:1px solid var(--line);border-radius:14px;padding:0;width:min(760px,95vw);max-height:92vh}
+dialog::backdrop{background:#000a}
+.dh{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
+.db{padding:18px;overflow:auto;max-height:68vh}
+.df{padding:12px 18px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+#toast{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px;z-index:99}
+#toast div{background:var(--panel2);border-left:4px solid var(--ok);padding:10px 14px;border-radius:8px;box-shadow:0 6px 20px #0008;max-width:360px}
+#toast div.err{border-color:var(--bad)}
+.tl{border-left:2px solid var(--line);margin-left:8px;padding-left:16px}
+.tl .ev{position:relative;padding:0 0 14px}
+.tl .ev:before{content:"";position:absolute;left:-23px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--acc);border:2px solid var(--panel)}
+.tl .ev.neg:before{background:var(--bad)}.tl .ev.in:before{background:var(--ok)}
+.alloc{font-size:12px;color:var(--info)}
+.hint{background:#f5b30115;border:1px solid #f5b30144;border-radius:8px;padding:8px 12px;color:var(--acc2);font-size:12px;margin-bottom:12px}
+.menu-btn{display:none}
+@media(max-width:820px){
+ .app{grid-template-columns:1fr}
+ nav{position:fixed;left:0;top:0;z-index:50;width:240px;transform:translateX(-100%);transition:.2s}
+ nav.open{transform:none}
+ .menu-btn{display:inline-block;margin-bottom:12px}
+ main{padding:14px}
+}
+@media print{nav,.bar,.menu-btn,.tabs{display:none!important}.app{display:block}body{background:#fff;color:#000}.card{border-color:#ccc}}
+</style>
+</head>
+<body>
+<div class="app">
+ <nav id="nav"></nav>
+ <main>
+  <button class="btn menu-btn" onclick="document.getElementById('nav').classList.toggle('open')">☰ Menú</button>
+  <div id="view"></div>
+ </main>
+</div>
+<dialog id="dlg"><form method="dialog" id="dform" onsubmit="return false"><div class="dh"><b id="dtitle"></b><button type="button" class="btn sm" onclick="closeModal()">✕</button></div><div class="db" id="dbody"></div><div class="df" id="dfoot"></div></form></dialog>
+<div id="toast"></div>
+
+<script>
+/* =====================================================================
+   LUBRICENTRO MAXI · Sistema de Stock y Trazabilidad (demo HTML5)
+   Datos en localStorage. Modelo equivalente a schema.sql.
+   Desarrollado por VINCULAR BUSINESS · (387) 4484132 · vincularbusiness@gmail.com
+   ===================================================================== */
+const LS='lubricentro_maxi_v1';
+let DB=null;
+
+/* ---------- utilidades ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const r3=n=>Math.round((n+Number.EPSILON)*1000)/1000;
+const money=n=>new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(n||0);
+const num=n=>new Intl.NumberFormat('es-AR',{maximumFractionDigits:3}).format(n||0);
+const z2=n=>String(n).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+z2(d.getMonth()+1)+'-'+z2(d.getDate());
+const hoy=()=>ymd(new Date());
+const addDays=n=>{const d=new Date();d.setDate(d.getDate()+n);return ymd(d)};
+const diffDays=(a,b)=>Math.round((new Date(a+'T00:00:00')-new Date(b+'T00:00:00'))/864e5);
+const nowIso=()=>{const d=new Date();return ymd(d)+'T'+z2(d.getHours())+':'+z2(d.getMinutes())};
+const fdate=s=>s?s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(0,4):'—';
+const fdt=s=>s?fdate(s)+(s.length>10?' '+s.slice(11,16):''):'—';
+const nextId=t=>{DB.seq[t]=(DB.seq[t]||0)+1;return DB.seq[t]};
+const byId=(arr,id)=>arr.find(x=>x.id===Number(id));
+function save(){try{localStorage.setItem(LS,JSON.stringify(DB))}catch(e){console.warn(e)}}
+function toast(msg,err){const d=document.createElement('div');if(err)d.className='err';d.textContent=msg;$('#toast').appendChild(d);setTimeout(()=>d.remove(),err?6000:3500)}
+function downloadCsv(name,headers,rows){
+  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const txt='\ufeff'+[headers.map(q).join(';'),...rows.map(r=>r.map(q).join(';'))].join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/csv;charset=utf-8'}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+/* ---------- modal ---------- */
+function openModal(title,body,onSubmit,label){
+  $('#dtitle').textContent=title;$('#dbody').innerHTML=body;
+  $('#dfoot').innerHTML='<button type="button" class="btn" onclick="closeModal()">'+(onSubmit?'Cancelar':'Cerrar')+'</button>'+(onSubmit?'<button type="submit" class="btn pri">'+esc(label||'Guardar')+'</button>':'');
+  $('#dform').onsubmit=e=>{e.preventDefault();if(!onSubmit)return false;
+    try{const r=onSubmit(Object.fromEntries(new FormData($('#dform'))));if(r!==false)closeModal()}catch(err){toast(err.message,true)}return false};
+  const d=$('#dlg');if(!d.open)d.showModal();
+}
+function closeModal(){const d=$('#dlg');if(d.open)d.close()}
+
+/* =====================================================================
+   NÚCLEO DE NEGOCIO (stock por lote, FIFO/FEFO, trazabilidad)
+   El stock NO se guarda: se calcula sumando el libro de movimientos.
+   ===================================================================== */
+function stockMap(){const m={};DB.movimientos.forEach(x=>{m[x.loteId]=r3((m[x.loteId]||0)+x.cant)});return m}
+function estadoVenc(l){
+  if(!l.venc)return'sin';
+  const d=diffDays(l.venc,hoy());
+  if(d<0)return'vencido';
+  return d<=DB.cfg.diasAlerta?'proximo':'ok';
+}
+function ordenarLotes(lotes,crit){
+  return lotes.slice().sort((a,b)=>{
+    if(crit==='FEFO'){const av=a.venc||'9999-12-31',bv=b.venc||'9999-12-31';if(av!==bv)return av<bv?-1:1}
+    if(a.ingreso!==b.ingreso)return a.ingreso<b.ingreso?-1:1;
+    return a.id-b.id;
+  });
+}
+/* Lotes vendibles de un producto: con stock, no vencidos, ordenados por criterio */
+function lotesVendibles(prodId,sm){
+  sm=sm||stockMap();
+  return ordenarLotes(DB.lotes.filter(l=>l.productoId===prodId&&(sm[l.id]||0)>0&&estadoVenc(l)!=='vencido'),DB.cfg.criterio);
+}
+/* Asigna cantidad a lotes (muta sm para poder encadenar renglones). Lanza error si no alcanza. */
+function asignar(prodId,cant,loteId,sm){
+  const p=byId(DB.productos,prodId);
+  if(!(cant>0))throw new Error('Cantidad inválida para '+p.nombre);
+  const disp=lotesVendibles(prodId,sm);
+  if(loteId){
+    const l=disp.find(x=>x.id===Number(loteId));
+    if(!l)throw new Error('El lote elegido no está disponible (sin stock o vencido) para '+p.nombre);
+    if(sm[l.id]<cant)throw new Error('El lote '+l.nro+' sólo tiene '+num(sm[l.id])+' '+p.unidad+' de '+p.nombre);
+    sm[l.id]=r3(sm[l.id]-cant);return[{loteId:l.id,cant}];
+  }
+  let rest=cant;const out=[];
+  for(const l of disp){
+    const t=Math.min(rest,sm[l.id]);out.push({loteId:l.id,cant:r3(t)});sm[l.id]=r3(sm[l.id]-t);rest=r3(rest-t);if(rest<=0)break;
+  }
+  if(rest>0)throw new Error('Stock insuficiente de '+p.nombre+': faltan '+num(rest)+' '+p.unidad+' (los lotes vencidos no se venden)');
+  return out;
+}
+const stockFisico=(pid,sm)=>DB.lotes.filter(l=>l.productoId===pid).reduce((s,l)=>s+(sm[l.id]||0),0);
+const stockDisp=(pid,sm)=>r3(DB.lotes.filter(l=>l.productoId===pid&&estadoVenc(l)!=='vencido').reduce((s,l)=>s+(sm[l.id]||0),0));
+const stockVencido=(pid,sm)=>r3(DB.lotes.filter(l=>l.productoId===pid&&estadoVenc(l)==='vencido').reduce((s,l)=>s+(sm[l.id]||0),0));
+
+function pushMov(m){DB.movimientos.push({id:nextId('mov'),fecha:m.fecha||nowIso(),tipo:m.tipo,loteId:m.loteId,productoId:m.productoId,cant:r3(m.cant),costo:m.costo||0,refTipo:m.refTipo||'',refId:m.refId||0,nota:m.nota||''})}
+
+/* COMPRA: crea cabecera, renglones, lotes y movimientos ENTRADA (todo o nada) */
+function crearCompra(c){
+  if(!c.proveedorId)throw new Error('Elegí un proveedor');
+  if(!c.numero||!c.numero.trim())throw new Error('Ingresá el número de remito/factura');
+  if(!c.items.length)throw new Error('Agregá al menos un renglón');
+  const dup=DB.compras.find(x=>x.proveedorId===Number(c.proveedorId)&&x.tipo===c.tipo&&x.numero.trim().toLowerCase()===c.numero.trim().toLowerCase());
+  if(dup)throw new Error('Ese comprobante ya fue cargado para este proveedor (compra #'+dup.id+')');
+  const snap=JSON.stringify(DB);
+  try{
+    const compra={id:nextId('compra'),proveedorId:Number(c.proveedorId),tipo:c.tipo,numero:c.numero.trim(),fecha:c.fecha||hoy(),obs:c.obs||'',total:0};
+    DB.compras.push(compra);
+    c.items.forEach(it=>{
+      const p=byId(DB.productos,it.productoId);
+      if(!(it.cant>0))throw new Error('Cantidad inválida en '+p.nombre);
+      if(!(it.costo>=0))throw new Error('Costo inválido en '+p.nombre);
+      if(!it.nro||!it.nro.trim())throw new Error('Falta el N° de lote de '+p.nombre);
+      if(p.controlaVenc&&!it.venc)throw new Error('Falta la fecha de vencimiento de '+p.nombre);
+      const nro=it.nro.trim();const venc=it.venc||'';
+      let lote=DB.lotes.find(l=>l.productoId===p.id&&l.nro.toLowerCase()===nro.toLowerCase());
+      if(lote){
+        if((lote.venc||'')!==venc)throw new Error('El lote '+nro+' de '+p.nombre+' ya existe con otro vencimiento ('+fdate(lote.venc)+')');
+      }else{
+        lote={id:nextId('lote'),productoId:p.id,nro,venc,ingreso:compra.fecha,compraId:compra.id,proveedorId:compra.proveedorId,cantInicial:0,costo:it.costo};
+        DB.lotes.push(lote);
+      }
+      lote.cantInicial=r3(lote.cantInicial+it.cant);
+      // costo del lote = promedio ponderado si se completa un lote existente
+      DB.compraItems.push({id:nextId('compraItem'),compraId:compra.id,productoId:p.id,loteId:lote.id,cant:it.cant,costo:it.costo});
+      compra.total+=it.cant*it.costo;
+      pushMov({fecha:compra.fecha+'T09:00',tipo:'ENTRADA',loteId:lote.id,productoId:p.id,cant:it.cant,costo:it.costo,refTipo:'compra',refId:compra.id,nota:compra.tipo+' '+compra.numero});
+    });
+    save();return compra;
+  }catch(e){DB=JSON.parse(snap);throw e}
+}
+/* VENTA: asigna lotes por FEFO/FIFO (o lote elegido), descuenta stock con movimientos VENTA */
+function crearVenta(v){
+  if(!v.items.length)throw new Error('El carrito está vacío');
+  const sm=stockMap();const plan=v.items.map(it=>({...it,allocs:asignar(it.productoId,it.cant,it.loteId||null,sm)}));
+  const venta={id:nextId('venta'),fecha:v.fecha||nowIso(),cliente:(v.cliente||'').trim()||'Consumidor final',medio:v.medio||'Efectivo',total:0};
+  DB.ventas.push(venta);
+  plan.forEach(it=>{
+    const vi={id:nextId('ventaItem'),ventaId:venta.id,productoId:it.productoId,cant:it.cant,precio:it.precio,allocs:[]};
+    it.allocs.forEach(a=>{
+      const l=byId(DB.lotes,a.loteId);vi.allocs.push({loteId:a.loteId,cant:a.cant,costo:l.costo});
+      pushMov({fecha:venta.fecha,tipo:'VENTA',loteId:a.loteId,productoId:it.productoId,cant:-a.cant,costo:l.costo,refTipo:'venta',refId:venta.id,nota:'Ticket #'+venta.id});
+    });
+    DB.ventaItems.push(vi);venta.total+=it.cant*it.precio;
+  });
+  save();return venta;
+}
+/* AJUSTE / SALIDA no comercial */
+const TIPOS_MOV={ENTRADA:'Entrada (compra)',VENTA:'Venta',MERMA:'Merma',VENCIDO:'Baja por vencimiento',ROTURA:'Rotura',AJUSTE_POS:'Ajuste (+)',AJUSTE_NEG:'Ajuste (−)'};
+function crearAjuste(a){
+  const l=byId(DB.lotes,a.loteId);if(!l)throw new Error('Elegí un lote');
+  const sm=stockMap();const cant=Number(a.cant);
+  if(!(cant>0))throw new Error('Cantidad inválida');
+  if(!a.nota||!a.nota.trim())throw new Error('Indicá el motivo del ajuste (queda en la auditoría)');
+  const neg=a.tipo!=='AJUSTE_POS';
+  if(neg&&cant>(sm[l.id]||0))throw new Error('El lote '+l.nro+' sólo tiene '+num(sm[l.id]||0));
+  pushMov({fecha:a.fecha,tipo:a.tipo,loteId:l.id,productoId:l.productoId,cant:neg?-cant:cant,costo:l.costo,refTipo:'ajuste',refId:0,nota:a.nota.trim()});
+  save();
+}
+/* TRAZABILIDAD de un lote: origen + cadena de movimientos con saldo corrido */
+function trazar(loteId){
+  const l=byId(DB.lotes,loteId);if(!l)return null;
+  const p=byId(DB.productos,l.productoId),prov=byId(DB.proveedores,l.proveedorId),c=byId(DB.compras,l.compraId);
+  let saldo=0;
+  const movs=DB.movimientos.filter(m=>m.loteId===l.id).sort((a,b)=>a.fecha<b.fecha?-1:a.fecha>b.fecha?1:a.id-b.id).map(m=>{saldo=r3(saldo+m.cant);return{...m,saldo}});
+  return{lote:l,prod:p,prov,compra:c,movs,saldo};
+}
+/* ALERTAS */
+function calcAlertas(){
+  const sm=stockMap();const out={criticos:[],reorden:[],proximos:[],vencidos:[]};
+  DB.productos.filter(p=>p.activo).forEach(p=>{
+    const d=stockDisp(p.id,sm);
+    if(d<=p.stockMin)out.criticos.push({p,stock:d});
+    else if(d<=p.puntoReorden)out.reorden.push({p,stock:d});
+  });
+  DB.lotes.forEach(l=>{
+    const s=sm[l.id]||0;if(s<=0)return;const p=byId(DB.productos,l.productoId);const e=estadoVenc(l);
+    if(e==='proximo')out.proximos.push({l,p,stock:s,dias:diffDays(l.venc,hoy())});
+    if(e==='vencido')out.vencidos.push({l,p,stock:s,dias:diffDays(l.venc,hoy())});
+  });
+  out.proximos.sort((a,b)=>a.dias-b.dias);out.vencidos.sort((a,b)=>a.dias-b.dias);
+  out.criticos.sort((a,b)=>a.stock-b.stock);
+  return out;
+}
+const totalAlertas=a=>a.criticos.length+a.proximos.length+a.vencidos.length;
+function valorizacion(){
+  const sm=stockMap();
+  return DB.lotes.filter(l=>(sm[l.id]||0)>0).map(l=>({l,p:byId(DB.productos,l.productoId),stock:sm[l.id],valor:r3(sm[l.id]*l.costo),estado:estadoVenc(l)}));
+}
+
+/* =====================================================================
+   DATOS DE DEMO
+   ===================================================================== */
+function seed(){
+  DB={cfg:{criterio:'FEFO',diasAlerta:60,nombre:'Lubricentro Maxi'},seq:{},
+    categorias:['Aceites','Filtros','Aditivos','Refrigerantes','Líquidos de freno','Grasas','Limpieza'],
+    unidades:['Un','Lt','Kg','Bidón','Pack'],
+    productos:[],proveedores:[],compras:[],compraItems:[],lotes:[],movimientos:[],ventas:[],ventaItems:[]};
+  const prov=(razon,cuit,contacto,tel,email,dir,notas)=>{const p={id:nextId('prov'),razon,cuit,contacto,tel,email,dir,notas,activo:true};DB.proveedores.push(p);return p.id};
+  const P1=prov('Lubrimax Distribuciones SRL','30-71234567-8','Marcelo Quiroga','387 4556677','ventas@lubrimax.example','Av. Bolivia 2450, Salta','Aceites y grasas · entrega martes y viernes');
+  const P2=prov('Filtros del Norte SA','30-70987654-3','Laura Benítez','387 4223344','pedidos@filtrosnorte.example','Parque Industrial, Salta','Filtros de aceite, aire, combustible y habitáculo');
+  const P3=prov('Química Automotor Salta','30-71555123-6','Diego Farfán','387 4001122','diego@quimicaauto.example','Ruta 51 km 4, Salta','Aditivos, refrigerantes y líquidos de freno');
+  const prod=(codigo,nombre,marca,categoria,unidad,min,reord,precio,costoRef,cv)=>{const p={id:nextId('prod'),codigo,nombre,marca,categoria,unidad,stockMin:min,puntoReorden:reord,precio,costoRef,controlaVenc:cv,activo:true};DB.productos.push(p);return p.id};
+  const A1=prod('7790001000011','Aceite Motor 10W-40 Semisintético 1 Lt','YPF Elaion','Aceites','Lt',40,80,9800,6400,true);
+  const A2=prod('7790001000028','Aceite Motor 5W-30 Sintético 1 Lt','YPF Elaion','Aceites','Lt',30,60,13500,9100,true);
+  const A3=prod('7790001000035','Aceite Motor 15W-40 Diésel Bidón 4 Lt','Shell Helix','Aceites','Bidón',6,12,39000,27000,true);
+  const A4=prod('7790001000042','Aceite Motor 20W-50 Mineral 1 Lt','Mobil','Aceites','Lt',24,48,9200,6000,true);
+  const A5=prod('7790001000059','Aceite Caja ATF Dexron VI 1 Lt','Castrol','Aceites','Lt',12,24,11800,7900,true);
+  const F1=prod('7790002000018','Filtro de aceite PH5949','Fram','Filtros','Un',10,20,6800,3900,false);
+  const F2=prod('7790002000025','Filtro de aire AR-1125','Wega','Filtros','Un',6,12,8900,5200,false);
+  const F3=prod('7790002000032','Filtro de combustible G-5012','Mann','Filtros','Un',6,10,11500,7000,false);
+  const F4=prod('7790002000049','Filtro de habitáculo AKX-35','Wega','Filtros','Un',5,10,7900,4300,false);
+  const D1=prod('7790003000015','Aditivo limpia inyectores 354 ml','Liqui Moly','Aditivos','Un',8,16,14500,9300,true);
+  const D2=prod('7790003000022','Refrigerante Long Life 50/50 1 Lt','Paraflú','Refrigerantes','Lt',20,40,6900,4100,true);
+  const D3=prod('7790003000039','Líquido de frenos DOT 4 500 ml','Bosch','Líquidos de freno','Un',8,16,8200,5100,true);
+  const D4=prod('7790004000012','Grasa multipropósito litio 400 g','Lubrimax','Grasas','Un',6,12,5400,3000,true);
+  const D5=prod('7790005000019','Limpiaparabrisas concentrado 5 Lt','Sonax','Limpieza','Un',4,8,12300,7600,true);
+  const comp=(provId,tipo,numero,dias,items)=>crearCompra({proveedorId:provId,tipo,numero,fecha:addDays(-dias),items});
+  comp(P1,'Remito','0003-00004521',95,[
+    {productoId:A1,nro:'L24-0815',venc:addDays(300),cant:120,costo:6200},
+    {productoId:A2,nro:'L24-0901',venc:addDays(45),cant:60,costo:9000},
+    {productoId:A3,nro:'L24-1002',venc:addDays(480),cant:14,costo:26500},
+    {productoId:A4,nro:'L24-0722',venc:addDays(260),cant:48,costo:5900},
+    {productoId:A5,nro:'L24-0910',venc:addDays(520),cant:24,costo:7700},
+    {productoId:D4,nro:'G24-0301',venc:addDays(700),cant:24,costo:2900}]);
+  comp(P2,'Factura A','0012-00018830',70,[
+    {productoId:F1,nro:'FN-2208',venc:'',cant:40,costo:3800},
+    {productoId:F2,nro:'FN-2209',venc:'',cant:20,costo:5100},
+    {productoId:F3,nro:'FN-2210',venc:'',cant:16,costo:6900},
+    {productoId:F4,nro:'FN-2211',venc:'',cant:12,costo:4200}]);
+  comp(P3,'Remito','0001-00007712',130,[
+    {productoId:D1,nro:'QA-2301',venc:addDays(25),cant:16,costo:9100},
+    {productoId:D2,nro:'QA-2302',venc:addDays(380),cant:60,costo:4000},
+    {productoId:D3,nro:'QA-2303',venc:addDays(-12),cant:12,costo:5000},
+    {productoId:D5,nro:'QA-2304',venc:addDays(600),cant:10,costo:7400}]);
+  comp(P1,'Factura A','0003-00004610',20,[
+    {productoId:A1,nro:'L25-0120',venc:addDays(720),cant:100,costo:6500},
+    {productoId:A2,nro:'L25-0210',venc:addDays(690),cant:40,costo:9300}]);
+  comp(P3,'Remito','0001-00007890',15,[
+    {productoId:D3,nro:'QA-2409',venc:addDays(400),cant:12,costo:5200},
+    {productoId:D1,nro:'QA-2410',venc:addDays(500),cant:10,costo:9500}]);
+  const venta=(dias,cliente,medio,items)=>crearVenta({fecha:addDays(-dias)+'T11:30',cliente,medio,items});
+  const pr=id=>byId(DB.productos,id).precio;
+  venta(40,'Consumidor final','Efectivo',[{productoId:A1,cant:30,precio:pr(A1)},{productoId:F1,cant:10,precio:pr(F1)}]);
+  venta(30,'Transportes Andes SRL','Transferencia',[{productoId:A3,cant:9,precio:pr(A3)},{productoId:F3,cant:8,precio:pr(F3)}]);
+  venta(18,'Consumidor final','Tarjeta',[{productoId:A2,cant:20,precio:pr(A2)},{productoId:F4,cant:9,precio:pr(F4)}]);
+  venta(9,'Juan Pérez','Efectivo',[{productoId:A1,cant:35,precio:pr(A1)},{productoId:A4,cant:30,precio:pr(A4)},{productoId:F2,cant:12,precio:pr(F2)}]);
+  venta(3,'Consumidor final','Efectivo',[{productoId:D1,cant:6,precio:pr(D1)},{productoId:D3,cant:6,precio:pr(D3)},{productoId:A5,cant:14,precio:pr(A5)}]);
+  venta(0,'Consumidor final','Efectivo',[{productoId:A1,cant:4,precio:pr(A1)},{productoId:F1,cant:2,precio:pr(F1)}]);
+  const l=DB.lotes.find(x=>x.nro==='G24-0301');
+  crearAjuste({loteId:l.id,tipo:'ROTURA',cant:2,nota:'Tarros golpeados en depósito',fecha:addDays(-5)+'T16:10'});
+  const l2=DB.lotes.find(x=>x.nro==='FN-2209');
+  crearAjuste({loteId:l2.id,tipo:'AJUSTE_NEG',cant:1,nota:'Diferencia en inventario físico',fecha:addDays(-2)+'T18:00'});
+  save();
+}
+function load(){
+  try{DB=JSON.parse(localStorage.getItem(LS)||'null')}catch(e){DB=null}
+  if(!DB||!DB.productos)seed();
+}
+
+/* =====================================================================
+   INTERFAZ
+   ===================================================================== */
+const VIEWS=[['panel','Panel'],['alertas','Alertas'],['productos','Productos'],['inventario','Inventario y lotes'],['proveedores','Proveedores'],['compras','Compras'],['ventas','Ventas'],['ajustes','Ajustes y mermas'],['trazabilidad','Trazabilidad'],['reportes','Reportes']];
+let view='panel',tabs={inventario:'producto',compras:'nueva',reportes:'mov'},cart=[],draft=null,trazLote=null;
+const flt={prod:{q:'',cat:'',inact:false},inv:{q:'',estado:'',soloStock:true},mov:{desde:'',hasta:'',prod:'',tipo:'',lote:''},val:{cat:''}};
+
+function go(v){view=v;trazLote=v==='trazabilidad'?trazLote:trazLote;location.hash=v;$('#nav').classList.remove('open');render()}
+window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(VIEWS.some(x=>x[0]===h)&&h!==view){view=h;render()}});
+
+function renderNav(){
+  const al=calcAlertas();const n=totalAlertas(al);
+  $('#nav').innerHTML='<div class="brand"><div class="logo">M</div><div><b>Lubricentro Maxi</b><small>Stock y trazabilidad</small></div></div>'+
+   VIEWS.map(([k,t])=>'<a class="'+(k===view?'on':'')+'" onclick="go(\''+k+'\')">'+t+(k==='alertas'&&n?'<span class="cnt">'+n+'</span>':'')+'</a>').join('')+
+   '<div class="sp"></div><a onclick="openConfig()">⚙ Configuración</a>'+
+   '<div class="credits">Desarrollado por <b>VINCULAR BUSINESS</b><br>(387) 4484132<br>vincularbusiness@gmail.com<br><i>Tu idea, en buenas manos.</i></div>';
+}
+function render(){renderNav();const f=R[view];$('#view').innerHTML=f();if(R_after[view])R_after[view]()}
+const head=(t,s)=>'<h1>'+t+'</h1><p class="sub">'+s+'</p>';
+const badgeVenc=l=>{const e=estadoVenc(l);if(e==='sin')return'<span class="badge b-mut">Sin venc.</span>';const d=diffDays(l.venc,hoy());
+  return e==='vencido'?'<span class="badge b-bad">Vencido '+fdate(l.venc)+'</span>':e==='proximo'?'<span class="badge b-warn">'+fdate(l.venc)+' · '+d+' d</span>':'<span class="badge b-ok">'+fdate(l.venc)+'</span>'};
+const optsProd=(sel,onlyAct=true)=>DB.productos.filter(p=>!onlyAct||p.activo).map(p=>'<option value="'+p.id+'"'+(Number(sel)===p.id?' selected':'')+'>'+esc(p.nombre)+' ['+esc(p.codigo)+']</option>').join('');
+
+const R={}, R_after={};
+
+/* ---------- Panel ---------- */
+R.panel=()=>{
+  const al=calcAlertas(),sm=stockMap(),val=valorizacion().reduce((s,x)=>s+x.valor,0);
+  const vHoy=DB.ventas.filter(v=>v.fecha.slice(0,10)===hoy()).reduce((s,v)=>s+v.total,0);
+  const ult=DB.movimientos.slice().sort((a,b)=>b.fecha<a.fecha?-1:b.fecha>a.fecha?1:b.id-a.id).slice(0,8);
+  return head('Panel','Resumen del inventario · criterio de salida: <b>'+DB.cfg.criterio+'</b> · alerta de vencimiento a '+DB.cfg.diasAlerta+' días')+
+  '<div class="grid g4" style="margin-bottom:16px">'+
+  '<div class="kpi"><small>Productos activos</small><b>'+DB.productos.filter(p=>p.activo).length+'</b></div>'+
+  '<div class="kpi ok"><small>Valor del inventario (a costo)</small><b>'+money(val)+'</b></div>'+
+  '<div class="kpi '+(al.criticos.length?'bad':'')+'"><small>Stock crítico</small><b>'+al.criticos.length+'</b></div>'+
+  '<div class="kpi '+(al.proximos.length?'warn':'')+'"><small>Lotes por vencer</small><b>'+al.proximos.length+'</b></div>'+
+  '<div class="kpi '+(al.vencidos.length?'bad':'')+'"><small>Lotes vencidos con stock</small><b>'+al.vencidos.length+'</b></div>'+
+  '<div class="kpi"><small>Ventas de hoy</small><b>'+money(vHoy)+'</b></div></div>'+
+  '<div class="grid g2"><div class="card"><h2>⚠ Requiere atención</h2>'+alertasResumen(al)+'<div style="margin-top:10px"><button class="btn sm" onclick="go(\'alertas\')">Ver todas las alertas</button></div></div>'+
+  '<div class="card"><h2>Últimos movimientos</h2><div class="wrap"><table class="tbl"><tr><th>Fecha</th><th>Tipo</th><th>Producto / lote</th><th class="r">Cant.</th></tr>'+
+  ult.map(m=>{const l=byId(DB.lotes,m.loteId),p=byId(DB.productos,m.productoId);return'<tr><td>'+fdt(m.fecha)+'</td><td>'+tipoBadge(m.tipo)+'</td><td>'+esc(p.nombre)+'<div class="mut small">Lote '+esc(l.nro)+'</div></td><td class="r">'+(m.cant>0?'+':'')+num(m.cant)+'</td></tr>'}).join('')+'</table></div></div></div>'+
+  '<div class="card"><h2>Flujo de datos</h2><p class="mut small" style="margin:0">Compra (remito/factura) → <b>crea lotes</b> con vencimiento y genera movimiento ENTRADA → el stock de cada lote es la suma de sus movimientos → la venta pide lotes según <b>'+DB.cfg.criterio+'</b> (o el lote elegido) y genera movimientos VENTA por lote → ajustes/mermas/vencidos generan movimientos propios → toda salida es trazable hasta su remito de origen.</p></div>';
+};
+function alertasResumen(al){
+  const rows=[];
+  al.vencidos.slice(0,3).forEach(x=>rows.push('<div><span class="badge b-bad">Vencido</span> '+esc(x.p.nombre)+' · lote '+esc(x.l.nro)+' · '+num(x.stock)+' '+esc(x.p.unidad)+'</div>'));
+  al.criticos.slice(0,4).forEach(x=>rows.push('<div><span class="badge b-bad">Crítico</span> '+esc(x.p.nombre)+' · quedan '+num(x.stock)+' (mín. '+num(x.p.stockMin)+')</div>'));
+  al.proximos.slice(0,4).forEach(x=>rows.push('<div><span class="badge b-warn">Por vencer</span> '+esc(x.p.nombre)+' · lote '+esc(x.l.nro)+' · '+x.dias+' días</div>'));
+  return rows.length?'<div style="display:grid;gap:7px">'+rows.join('')+'</div>':'<div class="empty">Sin alertas 👌</div>';
+}
+const tipoBadge=t=>{const c=t==='ENTRADA'||t==='AJUSTE_POS'?'b-ok':t==='VENTA'?'b-info':t==='AJUSTE_NEG'?'b-mut':'b-bad';return'<span class="badge '+c+'">'+esc(TIPOS_MOV[t]||t)+'</span>'};
+
+/* ---------- Alertas ---------- */
+R.alertas=()=>{
+  const al=calcAlertas();
+  const tvenc=(arr,titulo,cls,vencidos)=>'<div class="card"><h2>'+titulo+' ('+arr.length+')</h2>'+(arr.length?'<div class="wrap"><table class="tbl"><tr><th>Producto</th><th>Lote</th><th>Vence</th><th class="r">Stock</th><th class="r">Valor</th><th></th></tr>'+
+    arr.map(x=>'<tr><td>'+esc(x.p.nombre)+'</td><td>'+esc(x.l.nro)+'</td><td>'+badgeVenc(x.l)+'</td><td class="r">'+num(x.stock)+' '+esc(x.p.unidad)+'</td><td class="r">'+money(x.stock*x.l.costo)+'</td><td class="act"><button class="btn sm" onclick="trazarLote('+x.l.id+')">Trazar</button> '+(vencidos?'<button class="btn sm danger" onclick="bajaVencido('+x.l.id+')">Dar de baja</button>':'')+'</td></tr>').join('')+'</table></div>':'<div class="empty">Nada para mostrar</div>')+'</div>';
+  const treord=(arr,titulo)=>'<div class="card"><h2>'+titulo+' ('+arr.length+')</h2>'+(arr.length?'<div class="wrap"><table class="tbl"><tr><th>Producto</th><th class="r">Disponible</th><th class="r">Mínimo</th><th class="r">Reorden</th><th class="r">Sugerido a pedir</th></tr>'+
+    arr.map(x=>'<tr><td>'+esc(x.p.nombre)+'<div class="mut small">'+esc(x.p.marca)+' · '+esc(x.p.categoria)+'</div></td><td class="r"><b>'+num(x.stock)+'</b> '+esc(x.p.unidad)+'</td><td class="r">'+num(x.p.stockMin)+'</td><td class="r">'+num(x.p.puntoReorden)+'</td><td class="r">'+num(Math.max(0,x.p.puntoReorden*2-x.stock))+'</td></tr>').join('')+'</table></div>':'<div class="empty">Nada para mostrar</div>')+'</div>';
+  return head('Alertas','Se recalculan solas con cada movimiento. El stock disponible no cuenta lotes vencidos.')+
+   tvenc(al.vencidos,'🔴 Lotes vencidos con stock',1,true)+treord(al.criticos,'🔴 Stock crítico (≤ mínimo)')+tvenc(al.proximos,'🟠 Próximos a vencer (≤ '+DB.cfg.diasAlerta+' días)',0,false)+treord(al.reorden,'🟡 En punto de reorden')+
+   '<p class="mut small">Sugerido a pedir = reponer hasta 2 × punto de reorden (regla simple de la demo).</p>';
+};
+function bajaVencido(id){
+  const l=byId(DB.lotes,id),sm=stockMap(),s=sm[id]||0;if(s<=0)return;
+  if(!confirm('¿Dar de baja '+num(s)+' unidades del lote '+l.nro+' por vencimiento?'))return;
+  crearAjuste({loteId:id,tipo:'VENCIDO',cant:s,nota:'Baja por vencimiento '+fdate(l.venc)});toast('Lote dado de baja');render();
+}
+function trazarLote(id){trazLote=id;go('trazabilidad')}
+
+/* ---------- Productos ---------- */
+R.productos=()=>{
+  const f=flt.prod,sm=stockMap();
+  const q=f.q.toLowerCase();
+  const list=DB.productos.filter(p=>(f.inact||p.activo)&&(!f.cat||p.categoria===f.cat)&&(!q||(p.nombre+' '+p.marca+' '+p.codigo).toLowerCase().includes(q)));
+  return head('Productos','Alta, modificación y baja de artículos. El código acepta lector de barras o QR.')+
+  '<div class="bar"><input id="fq" placeholder="Buscar o escanear código…" value="'+esc(f.q)+'" oninput="flt.prod.q=this.value;rerender(\'productos\',\'fq\')" style="min-width:240px"><select onchange="flt.prod.cat=this.value;render()"><option value="">Todas las categorías</option>'+DB.categorias.map(c=>'<option'+(f.cat===c?' selected':'')+'>'+esc(c)+'</option>').join('')+'</select>'+
+  '<label class="small mut"><input type="checkbox" '+(f.inact?'checked':'')+' onchange="flt.prod.inact=this.checked;render()"> ver dados de baja</label><div class="sp"></div><button class="btn pri" onclick="formProducto()">+ Nuevo producto</button></div>'+
+  '<div class="card wrap"><table class="tbl"><tr><th>Código</th><th>Producto</th><th>Categoría</th><th>Un.</th><th class="r">Disponible</th><th class="r">Mín.</th><th class="r">Reorden</th><th class="r">Precio</th><th>Estado</th><th></th></tr>'+
+  (list.length?list.map(p=>{const d=stockDisp(p.id,sm),v=stockVencido(p.id,sm);const est=!p.activo?'<span class="badge b-mut">De baja</span>':d<=p.stockMin?'<span class="badge b-bad">Crítico</span>':d<=p.puntoReorden?'<span class="badge b-warn">Reponer</span>':'<span class="badge b-ok">OK</span>';
+   return'<tr><td class="small">'+esc(p.codigo)+'</td><td><b>'+esc(p.nombre)+'</b><div class="mut small">'+esc(p.marca)+(p.controlaVenc?'':' · sin vencimiento')+'</div></td><td>'+esc(p.categoria)+'</td><td>'+esc(p.unidad)+'</td><td class="r"><b>'+num(d)+'</b>'+(v?'<div class="small" style="color:var(--bad)">+'+num(v)+' vencido</div>':'')+'</td><td class="r">'+num(p.stockMin)+'</td><td class="r">'+num(p.puntoReorden)+'</td><td class="r">'+money(p.precio)+'</td><td>'+est+'</td><td class="act"><button class="btn sm" onclick="formProducto('+p.id+')">Editar</button> '+(p.activo?'<button class="btn sm danger" onclick="bajaProducto('+p.id+')">Baja</button>':'<button class="btn sm" onclick="altaProducto('+p.id+')">Reactivar</button>')+'</td></tr>'}).join(''):'<tr><td colspan="10" class="empty">Sin resultados</td></tr>')+'</table></div>';
+};
+function rerender(v,focusId){if(view!==v)return;const el=document.getElementById(focusId);const pos=el?el.selectionStart:0;$('#view').innerHTML=R[v]();if(R_after[v])R_after[v]();const n=document.getElementById(focusId);if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(e){}}}
+function formProducto(id){
+  const p=id?byId(DB.productos,id):{codigo:'',nombre:'',marca:'',categoria:DB.categorias[0],unidad:'Un',stockMin:0,puntoReorden:0,precio:0,costoRef:0,controlaVenc:true};
+  openModal(id?'Editar producto':'Nuevo producto',
+   '<div class="form"><label>Código de barras / QR *<input name="codigo" required value="'+esc(p.codigo)+'"></label><label class="full">Nombre / descripción *<input name="nombre" required value="'+esc(p.nombre)+'"></label>'+
+   '<label>Marca<input name="marca" value="'+esc(p.marca)+'"></label><label>Categoría *<input name="categoria" list="dl-cat" required value="'+esc(p.categoria)+'"><datalist id="dl-cat">'+DB.categorias.map(c=>'<option>'+esc(c)+'</option>').join('')+'</datalist></label>'+
+   '<label>Unidad de medida<select name="unidad">'+DB.unidades.map(u=>'<option'+(p.unidad===u?' selected':'')+'>'+u+'</option>').join('')+'</select></label>'+
+   '<label>Stock mínimo<input name="stockMin" type="number" min="0" step="any" value="'+p.stockMin+'"></label><label>Punto de reorden<input name="puntoReorden" type="number" min="0" step="any" value="'+p.puntoReorden+'"></label>'+
+   '<label>Precio de venta ($)<input name="precio" type="number" min="0" step="any" value="'+p.precio+'"></label><label>Costo de referencia ($)<input name="costoRef" type="number" min="0" step="any" value="'+p.costoRef+'"></label>'+
+   '<label class="chk full"><input type="checkbox" name="controlaVenc" '+(p.controlaVenc?'checked':'')+'> Controla vencimiento (exige fecha en cada lote)</label></div>',
+   d=>{
+    d.codigo=d.codigo.trim();d.nombre=d.nombre.trim();
+    if(DB.productos.some(x=>x.codigo===d.codigo&&x.id!==id))throw new Error('Ya existe un producto con ese código');
+    const o={codigo:d.codigo,nombre:d.nombre,marca:d.marca.trim(),categoria:d.categoria.trim(),unidad:d.unidad,stockMin:Number(d.stockMin)||0,puntoReorden:Number(d.puntoReorden)||0,precio:Number(d.precio)||0,costoRef:Number(d.costoRef)||0,controlaVenc:!!d.controlaVenc};
+    if(o.puntoReorden<o.stockMin)throw new Error('El punto de reorden debe ser mayor o igual al stock mínimo');
+    if(!DB.categorias.includes(o.categoria))DB.categorias.push(o.categoria);
+    if(id)Object.assign(byId(DB.productos,id),o);else DB.productos.push({id:nextId('prod'),activo:true,...o});
+    save();toast('Producto guardado');render();
+   });
+}
+function bajaProducto(id){
+  const p=byId(DB.productos,id),tieneMov=DB.movimientos.some(m=>m.productoId===id);
+  if(!tieneMov){if(confirm('Eliminar "'+p.nombre+'" definitivamente? (no tiene movimientos)')){DB.productos=DB.productos.filter(x=>x.id!==id);save();render()}return}
+  const s=stockDisp(id,stockMap());
+  if(s>0&&!confirm('Tiene '+num(s)+' '+p.unidad+' en stock. Se da de baja igual (no se podrá vender) pero el historial se conserva. ¿Seguir?'))return;
+  p.activo=false;save();toast('Producto dado de baja (se conserva el historial)');render();
+}
+function altaProducto(id){byId(DB.productos,id).activo=true;save();render()}
+
+/* ---------- Inventario ---------- */
+R.inventario=()=>{
+  const sm=stockMap(),t=tabs.inventario,f=flt.inv;
+  const tb='<div class="tabs"><button class="'+(t==='producto'?'on':'')+'" onclick="tabs.inventario=\'producto\';render()">Por producto</button><button class="'+(t==='lote'?'on':'')+'" onclick="tabs.inventario=\'lote\';render()">Por lote</button></div>';
+  const q=f.q.toLowerCase();
+  const bar='<div class="bar"><input id="iq" placeholder="Buscar producto, código o lote…" value="'+esc(f.q)+'" oninput="flt.inv.q=this.value;rerender(\'inventario\',\'iq\')" style="min-width:240px">'+
+   (t==='lote'?'<select onchange="flt.inv.estado=this.value;render()"><option value="">Todos los estados</option><option value="ok"'+(f.estado==='ok'?' selected':'')+'>Vigentes</option><option value="proximo"'+(f.estado==='proximo'?' selected':'')+'>Por vencer</option><option value="vencido"'+(f.estado==='vencido'?' selected':'')+'>Vencidos</option><option value="sin"'+(f.estado==='sin'?' selected':'')+'>Sin vencimiento</option></select><label class="small mut"><input type="checkbox" '+(f.soloStock?'checked':'')+' onchange="flt.inv.soloStock=this.checked;render()"> sólo con stock</label>':'')+'</div>';
+  if(t==='producto'){
+    const rows=DB.productos.filter(p=>p.activo&&(!q||(p.nombre+p.codigo+p.marca).toLowerCase().includes(q))).map(p=>{
+      const ls=ordenarLotes(DB.lotes.filter(l=>l.productoId===p.id&&(sm[l.id]||0)>0),DB.cfg.criterio);const d=stockDisp(p.id,sm);const prox=lotesVendibles(p.id,sm)[0];
+      return'<tr><td><b>'+esc(p.nombre)+'</b><div class="mut small">'+esc(p.codigo)+'</div></td><td class="r"><b>'+num(d)+'</b> '+esc(p.unidad)+'</td><td class="r">'+ls.length+'</td><td>'+(prox?esc(prox.nro)+' '+badgeVenc(prox):'<span class="mut">—</span>')+'</td><td class="r">'+money(ls.reduce((s,l)=>s+sm[l.id]*l.costo,0))+'</td><td class="act"><button class="btn sm" onclick="flt.inv.q=\''+esc(p.codigo)+'\';tabs.inventario=\'lote\';render()">Ver lotes</button></td></tr>'});
+    return head('Inventario','Stock disponible por producto y próximo lote que saldrá según '+DB.cfg.criterio)+tb+bar+'<div class="card wrap"><table class="tbl"><tr><th>Producto</th><th class="r">Disponible</th><th class="r">Lotes c/stock</th><th>Sale primero ('+DB.cfg.criterio+')</th><th class="r">Valor</th><th></th></tr>'+rows.join('')+'</table></div>';
+  }
+  let ls=DB.lotes.filter(l=>{const p=byId(DB.productos,l.productoId);return(!q||(p.nombre+p.codigo+l.nro).toLowerCase().includes(q))&&(!f.estado||estadoVenc(l)===f.estado)&&(!f.soloStock||(sm[l.id]||0)>0)});
+  ls=ls.sort((a,b)=>a.productoId-b.productoId||(ordenarLotes([a,b],DB.cfg.criterio)[0]===a?-1:1));
+  return head('Inventario por lote','Cada lote conserva su vencimiento, proveedor y costo')+tb+bar+'<div class="card wrap"><table class="tbl"><tr><th>Producto</th><th>Lote</th><th>Ingreso</th><th>Vencimiento</th><th>Proveedor</th><th class="r">Inicial</th><th class="r">Stock</th><th class="r">Costo</th><th class="r">Valor</th><th></th></tr>'+
+   (ls.length?ls.map(l=>{const p=byId(DB.productos,l.productoId),pv=byId(DB.proveedores,l.proveedorId),s=sm[l.id]||0;return'<tr><td>'+esc(p.nombre)+'</td><td><b>'+esc(l.nro)+'</b></td><td>'+fdate(l.ingreso)+'</td><td>'+badgeVenc(l)+'</td><td class="small">'+esc(pv.razon)+'</td><td class="r">'+num(l.cantInicial)+'</td><td class="r"><b>'+num(s)+'</b></td><td class="r">'+money(l.costo)+'</td><td class="r">'+money(s*l.costo)+'</td><td class="act"><button class="btn sm" onclick="trazarLote('+l.id+')">Trazar</button> <button class="btn sm" onclick="formAjuste('+l.id+')">Ajustar</button></td></tr>'}).join(''):'<tr><td colspan="10" class="empty">Sin lotes</td></tr>')+'</table></div>';
+};
+
+/* ---------- Proveedores ---------- */
+R.proveedores=()=>{
+  return head('Proveedores','Datos de contacto y compras asociadas')+'<div class="bar"><div class="sp"></div><button class="btn pri" onclick="formProv()">+ Nuevo proveedor</button></div>'+
+  '<div class="card wrap"><table class="tbl"><tr><th>Razón social</th><th>CUIT</th><th>Contacto</th><th>Teléfono / email</th><th>Dirección</th><th class="r">Compras</th><th>Estado</th><th></th></tr>'+
+  DB.proveedores.map(p=>{const n=DB.compras.filter(c=>c.proveedorId===p.id).length;return'<tr><td><b>'+esc(p.razon)+'</b><div class="mut small">'+esc(p.notas)+'</div></td><td>'+esc(p.cuit)+'</td><td>'+esc(p.contacto)+'</td><td>'+esc(p.tel)+'<div class="small mut">'+esc(p.email)+'</div></td><td class="small">'+esc(p.dir)+'</td><td class="r">'+n+'</td><td>'+(p.activo?'<span class="badge b-ok">Activo</span>':'<span class="badge b-mut">Inactivo</span>')+'</td><td class="act"><button class="btn sm" onclick="formProv('+p.id+')">Editar</button> <button class="btn sm danger" onclick="bajaProv('+p.id+')">'+(p.activo?'Baja':'Reactivar')+'</button></td></tr>'}).join('')+'</table></div>';
+};
+function formProv(id){
+  const p=id?byId(DB.proveedores,id):{razon:'',cuit:'',contacto:'',tel:'',email:'',dir:'',notas:''};
+  openModal(id?'Editar proveedor':'Nuevo proveedor','<div class="form"><label class="full">Razón social *<input name="razon" required value="'+esc(p.razon)+'"></label><label>CUIT<input name="cuit" value="'+esc(p.cuit)+'"></label><label>Persona de contacto<input name="contacto" value="'+esc(p.contacto)+'"></label><label>Teléfono<input name="tel" value="'+esc(p.tel)+'"></label><label>Email<input name="email" type="email" value="'+esc(p.email)+'"></label><label class="full">Dirección<input name="dir" value="'+esc(p.dir)+'"></label><label class="full">Notas (rubros, días de entrega…)<textarea name="notas" rows="2">'+esc(p.notas)+'</textarea></label></div>',
+   d=>{if(id)Object.assign(byId(DB.proveedores,id),d);else DB.proveedores.push({id:nextId('prov'),activo:true,...d});save();toast('Proveedor guardado');render()});
+}
+function bajaProv(id){const p=byId(DB.proveedores,id);
+  if(p.activo&&!DB.compras.some(c=>c.proveedorId===id)){if(confirm('Eliminar proveedor sin compras?')){DB.proveedores=DB.proveedores.filter(x=>x.id!==id)}}else p.activo=!p.activo;save();render()}
+
+/* ---------- Compras ---------- */
+function newDraft(){draft={proveedorId:'',tipo:'Remito',numero:'',fecha:hoy(),obs:'',items:[]}}
+R.compras=()=>{
+  const t=tabs.compras;if(!draft)newDraft();
+  const tb='<div class="tabs"><button class="'+(t==='nueva'?'on':'')+'" onclick="tabs.compras=\'nueva\';render()">Ingresar remito / factura</button><button class="'+(t==='hist'?'on':'')+'" onclick="tabs.compras=\'hist\';render()">Historial</button></div>';
+  if(t==='hist'){
+    const rows=DB.compras.slice().sort((a,b)=>b.fecha<a.fecha?-1:b.fecha>a.fecha?1:b.id-a.id);
+    return head('Compras','Cada comprobante queda vinculado a los lotes que generó')+tb+'<div class="card wrap"><table class="tbl"><tr><th>#</th><th>Fecha</th><th>Proveedor</th><th>Comprobante</th><th class="r">Renglones</th><th class="r">Total</th><th></th></tr>'+
+     rows.map(c=>'<tr><td>'+c.id+'</td><td>'+fdate(c.fecha)+'</td><td>'+esc(byId(DB.proveedores,c.proveedorId).razon)+'</td><td>'+esc(c.tipo)+' '+esc(c.numero)+'</td><td class="r">'+DB.compraItems.filter(i=>i.compraId===c.id).length+'</td><td class="r">'+money(c.total)+'</td><td class="act"><button class="btn sm" onclick="verCompra('+c.id+')">Detalle</button></td></tr>').join('')+'</table></div>';
+  }
+  const d=draft;
+  return head('Ingreso de compra','Cargá el comprobante y, por cada renglón, el lote y su vencimiento. Al confirmar se crean los lotes y entra el stock.')+tb+
+  '<div class="card"><div class="form"><label>Proveedor *<select onchange="draft.proveedorId=this.value"><option value="">— elegir —</option>'+DB.proveedores.filter(p=>p.activo).map(p=>'<option value="'+p.id+'"'+(Number(d.proveedorId)===p.id?' selected':'')+'>'+esc(p.razon)+'</option>').join('')+'</select></label>'+
+  '<label>Tipo<select onchange="draft.tipo=this.value">'+['Remito','Factura A','Factura B','Factura C','Factura X'].map(x=>'<option'+(d.tipo===x?' selected':'')+'>'+x+'</option>').join('')+'</select></label>'+
+  '<label>N° comprobante *<input value="'+esc(d.numero)+'" placeholder="0001-00001234" oninput="draft.numero=this.value"></label><label>Fecha<input type="date" value="'+d.fecha+'" max="'+hoy()+'" onchange="draft.fecha=this.value"></label></div></div>'+
+  '<div class="card"><h2>Agregar renglón</h2><div class="form" id="lineForm"><label class="full">Producto<select id="l_prod" onchange="lineProdChange()"><option value="">— elegir —</option>'+optsProd('')+'</select></label>'+
+  '<label>N° de lote *<input id="l_nro" placeholder="L25-0301"></label><label>Vencimiento<input id="l_venc" type="date"></label><label>Cantidad *<input id="l_cant" type="number" min="0" step="any"></label><label>Costo unitario ($) *<input id="l_costo" type="number" min="0" step="any"></label></div>'+
+  '<div style="margin-top:10px"><button class="btn pri" onclick="addLine()">+ Agregar al comprobante</button></div></div>'+
+  '<div class="card"><h2>Renglones ('+d.items.length+')</h2>'+(d.items.length?'<div class="wrap"><table class="tbl"><tr><th>Producto</th><th>Lote</th><th>Vence</th><th class="r">Cant.</th><th class="r">Costo</th><th class="r">Subtotal</th><th></th></tr>'+
+   d.items.map((it,i)=>{const p=byId(DB.productos,it.productoId);return'<tr><td>'+esc(p.nombre)+'</td><td>'+esc(it.nro)+'</td><td>'+fdate(it.venc)+'</td><td class="r">'+num(it.cant)+' '+esc(p.unidad)+'</td><td class="r">'+money(it.costo)+'</td><td class="r">'+money(it.cant*it.costo)+'</td><td class="act"><button class="btn sm danger" onclick="draft.items.splice('+i+',1);render()">Quitar</button></td></tr>'}).join('')+
+   '<tr><td colspan="5" class="r"><b>Total</b></td><td class="r"><b>'+money(d.items.reduce((s,i)=>s+i.cant*i.costo,0))+'</b></td><td></td></tr></table></div>':'<div class="empty">Todavía no agregaste renglones</div>')+
+  '<div class="bar" style="margin-top:12px"><div class="sp"></div><button class="btn" onclick="newDraft();render()">Descartar</button><button class="btn pri" onclick="confirmarCompra()">Confirmar ingreso</button></div></div>';
+};
+function lineProdChange(){const p=byId(DB.productos,$('#l_prod').value);if(!p)return;$('#l_costo').value=p.costoRef||'';$('#l_venc').required=p.controlaVenc;$('#l_venc').disabled=!p.controlaVenc&&false}
+function addLine(){
+  try{
+    const pid=Number($('#l_prod').value);if(!pid)throw new Error('Elegí un producto');const p=byId(DB.productos,pid);
+    const it={productoId:pid,nro:$('#l_nro').value.trim(),venc:$('#l_venc').value,cant:Number($('#l_cant').value),costo:Number($('#l_costo').value)};
+    if(!it.nro)throw new Error('Ingresá el número de lote');if(p.controlaVenc&&!it.venc)throw new Error('Este producto exige fecha de vencimiento');
+    if(!(it.cant>0))throw new Error('Cantidad inválida');if(!(it.costo>=0)||$('#l_costo').value==='')throw new Error('Ingresá el costo');
+    if(it.venc&&it.venc<draft.fecha)toast('Atención: el lote ya ingresa vencido',true);
+    draft.items.push(it);saveDraftFields();render();
+  }catch(e){toast(e.message,true)}
+}
+function saveDraftFields(){}
+function confirmarCompra(){try{const c=crearCompra(draft);toast('Compra #'+c.id+' registrada: '+draft.items.length+' lote(s) ingresados');newDraft();tabs.compras='hist';render()}catch(e){toast(e.message,true)}}
+function verCompra(id){
+  const c=byId(DB.compras,id),pv=byId(DB.proveedores,c.proveedorId);
+  openModal('Compra #'+c.id+' · '+c.tipo+' '+c.numero,'<p class="mut">'+esc(pv.razon)+' · '+fdate(c.fecha)+'</p><div class="wrap"><table class="tbl"><tr><th>Producto</th><th>Lote</th><th>Vence</th><th class="r">Cant.</th><th class="r">Costo</th><th></th></tr>'+
+   DB.compraItems.filter(i=>i.compraId===id).map(i=>{const p=byId(DB.productos,i.productoId),l=byId(DB.lotes,i.loteId);return'<tr><td>'+esc(p.nombre)+'</td><td>'+esc(l.nro)+'</td><td>'+badgeVenc(l)+'</td><td class="r">'+num(i.cant)+'</td><td class="r">'+money(i.costo)+'</td><td><button type="button" class="btn sm" onclick="closeModal();trazarLote('+l.id+')">Trazar</button></td></tr>'}).join('')+'</table></div><p style="text-align:right"><b>Total '+money(c.total)+'</b></p>');
+}
+
+/* ---------- Ventas ---------- */
+let ventaQ='',ventaCliente='',ventaMedio='Efectivo';
+R.ventas=()=>{
+  const sm=stockMap(),q=ventaQ.toLowerCase();
+  const res=q?DB.productos.filter(p=>p.activo&&(p.nombre+' '+p.marca+' '+p.codigo).toLowerCase().includes(q)).slice(0,8):[];
+  const work={...sm};let total=0;
+  const lines=cart.map((it,i)=>{
+    const p=byId(DB.productos,it.productoId);let al='',err='';
+    try{const a=asignar(it.productoId,it.cant,it.loteId||null,work);al=a.map(x=>{const l=byId(DB.lotes,x.loteId);return esc(l.nro)+' ×'+num(x.cant)+(l.venc?' (vence '+fdate(l.venc)+')':'')}).join(' + ')}catch(e){err=e.message}
+    total+=it.cant*it.precio;
+    const vend=lotesVendibles(it.productoId,sm);
+    return'<tr><td><b>'+esc(p.nombre)+'</b><div class="small '+(err?'':'alloc')+'" '+(err?'style="color:var(--bad)"':'')+'>'+(err?'⚠ '+esc(err):'Saldrá de: '+al)+'</div></td>'+
+     '<td><input type="number" min="0.001" step="any" value="'+it.cant+'" style="width:80px" onchange="cart['+i+'].cant=Number(this.value);render()"> '+esc(p.unidad)+'</td>'+
+     '<td><select onchange="cart['+i+'].loteId=this.value?Number(this.value):null;render()"><option value="">Auto ('+DB.cfg.criterio+')</option>'+vend.map(l=>'<option value="'+l.id+'"'+(it.loteId===l.id?' selected':'')+'>'+esc(l.nro)+' · '+num(sm[l.id])+' '+(l.venc?'· v. '+fdate(l.venc):'')+'</option>').join('')+'</select></td>'+
+     '<td class="r"><input type="number" min="0" step="any" value="'+it.precio+'" style="width:90px" onchange="cart['+i+'].precio=Number(this.value);render()"></td><td class="r">'+money(it.cant*it.precio)+'</td><td class="act"><button class="btn sm danger" onclick="cart.splice('+i+',1);render()">✕</button></td></tr>'});
+  return head('Ventas y salidas','Escaneá el código (Enter) o buscá. El stock se descuenta del lote sugerido por '+DB.cfg.criterio+' o del que elijas.')+
+  '<div class="card"><input id="vq" autofocus placeholder="📷 Escanear código de barras/QR o escribir nombre… (Enter)" value="'+esc(ventaQ)+'" style="width:100%;font-size:16px;padding:12px" oninput="ventaQ=this.value;ventaSearch()" onkeydown="if(event.key===\'Enter\')ventaEnter()">'+
+   '<div id="vres">'+vres(res,sm)+'</div></div>'+
+  '<div class="card"><h2>Carrito</h2>'+(cart.length?'<div class="wrap"><table class="tbl"><tr><th>Producto</th><th>Cantidad</th><th>Lote</th><th class="r">Precio</th><th class="r">Subtotal</th><th></th></tr>'+lines.join('')+'</table></div>':'<div class="empty">Escaneá o buscá un producto para empezar</div>')+
+  '<div class="bar" style="margin-top:12px"><input placeholder="Cliente (opcional)" value="'+esc(ventaCliente)+'" oninput="ventaCliente=this.value"><select onchange="ventaMedio=this.value">'+['Efectivo','Transferencia','Tarjeta','Cuenta corriente'].map(m=>'<option'+(ventaMedio===m?' selected':'')+'>'+m+'</option>').join('')+'</select><div class="sp"></div><b style="font-size:20px">'+money(total)+'</b><button class="btn" onclick="cart=[];render()">Vaciar</button><button class="btn pri" onclick="confirmarVenta()">Confirmar venta</button></div></div>'+
+  '<div class="card"><h2>Últimas ventas</h2><div class="wrap"><table class="tbl"><tr><th>Ticket</th><th>Fecha</th><th>Cliente</th><th>Medio</th><th class="r">Total</th><th></th></tr>'+DB.ventas.slice().reverse().slice(0,10).map(v=>'<tr><td>#'+v.id+'</td><td>'+fdt(v.fecha)+'</td><td>'+esc(v.cliente)+'</td><td>'+esc(v.medio)+'</td><td class="r">'+money(v.total)+'</td><td class="act"><button class="btn sm" onclick="verVenta('+v.id+')">Detalle y lotes</button></td></tr>').join('')+'</table></div></div>';
+};
+function vres(res,sm){return res.length?'<div style="margin-top:10px;display:grid;gap:6px">'+res.map(p=>{const d=stockDisp(p.id,sm);return'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 10px;background:var(--panel2);border-radius:8px"><span><b>'+esc(p.nombre)+'</b> <span class="mut small">'+esc(p.codigo)+' · disp. '+num(d)+' '+esc(p.unidad)+'</span></span><button class="btn sm pri" '+(d>0?'':'disabled')+' onclick="addCart('+p.id+')">+ Agregar · '+money(p.precio)+'</button></div>'}).join('')+'</div>':''}
+function ventaSearch(){const q=ventaQ.toLowerCase();const sm=stockMap();const res=q?DB.productos.filter(p=>p.activo&&(p.nombre+' '+p.marca+' '+p.codigo).toLowerCase().includes(q)).slice(0,8):[];$('#vres').innerHTML=vres(res,sm)}
+function ventaEnter(){
+  const q=ventaQ.trim();if(!q)return;
+  let p=DB.productos.find(x=>x.activo&&x.codigo===q);
+  if(!p){const m=DB.productos.filter(x=>x.activo&&(x.nombre+' '+x.marca).toLowerCase().includes(q.toLowerCase()));if(m.length===1)p=m[0]}
+  if(p)addCart(p.id);else toast('No se encontró un único producto para "'+q+'"',true);
+}
+function addCart(pid){
+  const p=byId(DB.productos,pid);const ex=cart.find(c=>c.productoId===pid&&!c.loteId);
+  if(ex)ex.cant=r3(ex.cant+1);else cart.push({productoId:pid,cant:1,precio:p.precio,loteId:null});
+  ventaQ='';render();const e=$('#vq');if(e)e.focus();
+}
+function confirmarVenta(){
+  try{const v=crearVenta({items:cart,cliente:ventaCliente,medio:ventaMedio});cart=[];ventaCliente='';toast('Venta #'+v.id+' registrada · '+money(v.total));render();verVenta(v.id)}catch(e){toast(e.message,true)}
+}
+function verVenta(id){
+  const v=byId(DB.ventas,id);
+  openModal('Ticket #'+v.id,'<p class="mut">'+fdt(v.fecha)+' · '+esc(v.cliente)+' · '+esc(v.medio)+'</p><div class="wrap"><table class="tbl"><tr><th>Producto</th><th class="r">Cant.</th><th class="r">Precio</th><th>Lotes de salida</th></tr>'+
+   DB.ventaItems.filter(i=>i.ventaId===id).map(i=>{const p=byId(DB.productos,i.productoId);return'<tr><td>'+esc(p.nombre)+'</td><td class="r">'+num(i.cant)+'</td><td class="r">'+money(i.precio)+'</td><td class="small">'+i.allocs.map(a=>{const l=byId(DB.lotes,a.loteId);return'<a style="color:var(--info);cursor:pointer" onclick="closeModal();trazarLote('+l.id+')">'+esc(l.nro)+'</a> ×'+num(a.cant)}).join('<br>')+'</td></tr>'}).join('')+'</table></div><p style="text-align:right"><b>Total '+money(v.total)+'</b></p>');
+}
+
+/* ---------- Ajustes ---------- */
+R.ajustes=()=>{
+  const movs=DB.movimientos.filter(m=>!['ENTRADA','VENTA'].includes(m.tipo)).sort((a,b)=>b.fecha<a.fecha?-1:b.fecha>a.fecha?1:b.id-a.id);
+  return head('Ajustes, mermas y bajas','Salidas de stock que no son ventas. Siempre se descuentan de un lote puntual y exigen motivo.')+
+  '<div class="bar"><div class="sp"></div><button class="btn pri" onclick="formAjuste()">+ Registrar ajuste / merma</button></div>'+
+  '<div class="card wrap"><table class="tbl"><tr><th>Fecha</th><th>Tipo</th><th>Producto</th><th>Lote</th><th class="r">Cant.</th><th class="r">Valor</th><th>Motivo</th></tr>'+
+  (movs.length?movs.map(m=>{const p=byId(DB.productos,m.productoId),l=byId(DB.lotes,m.loteId);return'<tr><td>'+fdt(m.fecha)+'</td><td>'+tipoBadge(m.tipo)+'</td><td>'+esc(p.nombre)+'</td><td>'+esc(l.nro)+'</td><td class="r">'+(m.cant>0?'+':'')+num(m.cant)+'</td><td class="r">'+money(m.cant*m.costo)+'</td><td class="small">'+esc(m.nota)+'</td></tr>'}).join(''):'<tr><td colspan="7" class="empty">Sin ajustes registrados</td></tr>')+'</table></div>';
+};
+function formAjuste(loteId){
+  const sm=stockMap();const ls=DB.lotes.filter(l=>(sm[l.id]||0)>0||l.id===loteId);
+  openModal('Registrar ajuste / merma','<div class="form"><label class="full">Lote *<select name="loteId" required><option value="">— elegir —</option>'+ls.map(l=>{const p=byId(DB.productos,l.productoId);return'<option value="'+l.id+'"'+(l.id===loteId?' selected':'')+'>'+esc(p.nombre)+' · lote '+esc(l.nro)+' · stock '+num(sm[l.id]||0)+(estadoVenc(l)==='vencido'?' · VENCIDO':'')+'</option>'}).join('')+'</select></label>'+
+   '<label>Tipo<select name="tipo">'+['MERMA','ROTURA','VENCIDO','AJUSTE_NEG','AJUSTE_POS'].map(t=>'<option value="'+t+'">'+TIPOS_MOV[t]+'</option>').join('')+'</select></label><label>Cantidad *<input name="cant" type="number" min="0.001" step="any" required></label><label class="full">Motivo *<input name="nota" required placeholder="Ej.: envase pinchado, conteo físico, derrame…"></label></div>',
+   d=>{crearAjuste({loteId:Number(d.loteId),tipo:d.tipo,cant:Number(d.cant),nota:d.nota});toast('Ajuste registrado');render()});
+}
+
+/* ---------- Trazabilidad ---------- */
+R.trazabilidad=()=>{
+  const sm=stockMap();
+  const sel='<div class="bar"><select id="tl" style="min-width:320px" onchange="trazLote=Number(this.value)||null;render()"><option value="">— elegir lote —</option>'+DB.lotes.slice().sort((a,b)=>a.productoId-b.productoId||a.id-b.id).map(l=>{const p=byId(DB.productos,l.productoId);return'<option value="'+l.id+'"'+(trazLote===l.id?' selected':'')+'>'+esc(p.nombre)+' · '+esc(l.nro)+'</option>'}).join('')+'</select>'+
+   '<input id="tq" placeholder="…o escribí el N° de lote y Enter" onkeydown="if(event.key===\'Enter\')trazBuscar(this.value)"></div>';
+  const t=trazLote?trazar(trazLote):null;
+  if(!t)return head('Trazabilidad por lote','Del remito de compra a cada salida, con saldo corrido')+sel+'<div class="card empty">Elegí un lote para ver su historia completa</div>';
+  const {lote:l,prod:p,prov,compra:c}=t;
+  return head('Trazabilidad por lote','Del remito de compra a cada salida, con saldo corrido')+sel+
+  '<div class="card"><div class="grid g4"><div><small class="mut">Producto</small><div><b>'+esc(p.nombre)+'</b></div></div><div><small class="mut">Lote</small><div><b>'+esc(l.nro)+'</b></div></div><div><small class="mut">Vencimiento</small><div>'+badgeVenc(l)+'</div></div><div><small class="mut">Stock actual</small><div><b>'+num(t.saldo)+' '+esc(p.unidad)+'</b> de '+num(l.cantInicial)+'</div></div>'+
+  '<div><small class="mut">Proveedor</small><div>'+esc(prov.razon)+'</div></div><div><small class="mut">Comprobante</small><div>'+esc(c.tipo)+' '+esc(c.numero)+'</div></div><div><small class="mut">Ingreso</small><div>'+fdate(l.ingreso)+'</div></div><div><small class="mut">Costo unitario</small><div>'+money(l.costo)+'</div></div></div></div>'+
+  '<div class="card"><h2>Historia del lote</h2><div class="tl">'+t.movs.map(m=>{
+    let det=esc(m.nota);if(m.refTipo==='venta'){const v=byId(DB.ventas,m.refId);if(v)det='<a style="color:var(--info);cursor:pointer" onclick="verVenta('+v.id+')">Ticket #'+v.id+'</a> · '+esc(v.cliente)}
+    return'<div class="ev '+(m.cant>0?'in':'neg')+'"><div>'+tipoBadge(m.tipo)+' <b>'+(m.cant>0?'+':'')+num(m.cant)+' '+esc(p.unidad)+'</b> <span class="mut small">· '+fdt(m.fecha)+'</span></div><div class="small mut">'+det+' · saldo del lote: <b style="color:var(--tx)">'+num(m.saldo)+'</b></div></div>'}).join('')+'</div></div>';
+};
+function trazBuscar(v){v=v.trim().toLowerCase();const m=DB.lotes.filter(l=>l.nro.toLowerCase()===v);if(!m.length)return toast('No existe un lote con ese número',true);if(m.length>1)toast('Hay '+m.length+' productos con ese lote; elegí en la lista');trazLote=m[0].id;render()}
+
+/* ---------- Reportes ---------- */
+R.reportes=()=>{
+  const t=tabs.reportes;
+  const tb='<div class="tabs"><button class="'+(t==='mov'?'on':'')+'" onclick="tabs.reportes=\'mov\';render()">Movimientos por lote</button><button class="'+(t==='val'?'on':'')+'" onclick="tabs.reportes=\'val\';render()">Valorización de stock</button></div>';
+  if(t==='val'){
+    const v=valorizacion().filter(x=>!flt.val.cat||x.p.categoria===flt.val.cat);const tot=v.reduce((s,x)=>s+x.valor,0);const vv=v.filter(x=>x.estado==='vencido').reduce((s,x)=>s+x.valor,0);
+    const porCat={};v.forEach(x=>porCat[x.p.categoria]=(porCat[x.p.categoria]||0)+x.valor);
+    return head('Valorización de stock','Stock actual × costo de cada lote (costo real de compra)')+tb+
+    '<div class="bar"><select onchange="flt.val.cat=this.value;render()"><option value="">Todas las categorías</option>'+DB.categorias.map(c=>'<option'+(flt.val.cat===c?' selected':'')+'>'+esc(c)+'</option>').join('')+'</select><div class="sp"></div><button class="btn" onclick="expVal()">⬇ Exportar CSV</button><button class="btn" onclick="window.print()">🖨 Imprimir</button></div>'+
+    '<div class="grid g4" style="margin-bottom:14px"><div class="kpi ok"><small>Valor total</small><b>'+money(tot)+'</b></div><div class="kpi '+(vv?'bad':'')+'"><small>De lotes vencidos</small><b>'+money(vv)+'</b></div>'+Object.entries(porCat).map(([c,x])=>'<div class="kpi"><small>'+esc(c)+'</small><b style="font-size:18px">'+money(x)+'</b></div>').join('')+'</div>'+
+    '<div class="card wrap"><table class="tbl"><tr><th>Producto</th><th>Lote</th><th>Vence</th><th class="r">Stock</th><th class="r">Costo</th><th class="r">Valor</th><th class="r">A precio venta</th></tr>'+
+    v.sort((a,b)=>a.p.nombre.localeCompare(b.p.nombre)).map(x=>'<tr><td>'+esc(x.p.nombre)+'</td><td>'+esc(x.l.nro)+'</td><td>'+badgeVenc(x.l)+'</td><td class="r">'+num(x.stock)+' '+esc(x.p.unidad)+'</td><td class="r">'+money(x.l.costo)+'</td><td class="r">'+money(x.valor)+'</td><td class="r">'+money(x.stock*x.p.precio)+'</td></tr>').join('')+
+    '<tr><td colspan="5" class="r"><b>Total</b></td><td class="r"><b>'+money(tot)+'</b></td><td class="r"><b>'+money(v.reduce((s,x)=>s+x.stock*x.p.precio,0))+'</b></td></tr></table></div>';
+  }
+  const f=flt.mov,rows=movFiltrados();
+  return head('Reporte de movimientos','Filtrá por fecha, producto, lote o tipo. Es el libro completo de entradas y salidas.')+tb+
+  '<div class="bar"><label class="small mut">Desde <input type="date" value="'+f.desde+'" onchange="flt.mov.desde=this.value;render()"></label><label class="small mut">Hasta <input type="date" value="'+f.hasta+'" onchange="flt.mov.hasta=this.value;render()"></label>'+
+  '<select onchange="flt.mov.prod=this.value;render()"><option value="">Todos los productos</option>'+DB.productos.map(p=>'<option value="'+p.id+'"'+(String(f.prod)===String(p.id)?' selected':'')+'>'+esc(p.nombre)+'</option>').join('')+'</select>'+
+  '<select onchange="flt.mov.tipo=this.value;render()"><option value="">Todos los tipos</option>'+Object.entries(TIPOS_MOV).map(([k,v])=>'<option value="'+k+'"'+(f.tipo===k?' selected':'')+'>'+v+'</option>').join('')+'</select>'+
+  '<input id="ml" placeholder="N° de lote" value="'+esc(f.lote)+'" oninput="flt.mov.lote=this.value;rerender(\'reportes\',\'ml\')" style="width:130px"><div class="sp"></div><button class="btn" onclick="expMov()">⬇ Exportar CSV</button><button class="btn" onclick="window.print()">🖨 Imprimir</button></div>'+
+  '<div class="card wrap"><table class="tbl"><tr><th>Fecha</th><th>Tipo</th><th>Producto</th><th>Lote</th><th class="r">Cant.</th><th class="r">Valor</th><th>Referencia</th></tr>'+
+  (rows.length?rows.map(m=>{const p=byId(DB.productos,m.productoId),l=byId(DB.lotes,m.loteId);return'<tr><td>'+fdt(m.fecha)+'</td><td>'+tipoBadge(m.tipo)+'</td><td>'+esc(p.nombre)+'</td><td><a style="color:var(--info);cursor:pointer" onclick="trazarLote('+l.id+')">'+esc(l.nro)+'</a></td><td class="r">'+(m.cant>0?'+':'')+num(m.cant)+'</td><td class="r">'+money(m.cant*m.costo)+'</td><td class="small">'+esc(m.nota)+'</td></tr>'}).join(''):'<tr><td colspan="7" class="empty">Sin movimientos para ese filtro</td></tr>')+'</table></div><p class="mut small">'+rows.length+' movimientos · entradas '+num(rows.filter(m=>m.cant>0).reduce((s,m)=>s+m.cant,0))+' · salidas '+num(-rows.filter(m=>m.cant<0).reduce((s,m)=>s+m.cant,0))+'</p>';
+};
+function movFiltrados(){
+  const f=flt.mov;
+  return DB.movimientos.filter(m=>{const l=byId(DB.lotes,m.loteId);return(!f.desde||m.fecha.slice(0,10)>=f.desde)&&(!f.hasta||m.fecha.slice(0,10)<=f.hasta)&&(!f.prod||m.productoId===Number(f.prod))&&(!f.tipo||m.tipo===f.tipo)&&(!f.lote||l.nro.toLowerCase().includes(f.lote.toLowerCase()))}).sort((a,b)=>b.fecha<a.fecha?-1:b.fecha>a.fecha?1:b.id-a.id);
+}
+function expMov(){downloadCsv('movimientos_lubricentro_maxi.csv',['Fecha','Tipo','Producto','Lote','Cantidad','Costo unit.','Valor','Referencia'],movFiltrados().map(m=>[fdt(m.fecha),TIPOS_MOV[m.tipo],byId(DB.productos,m.productoId).nombre,byId(DB.lotes,m.loteId).nro,m.cant,m.costo,r3(m.cant*m.costo),m.nota]))}
+function expVal(){downloadCsv('valorizacion_lubricentro_maxi.csv',['Producto','Categoría','Lote','Vencimiento','Stock','Costo','Valor'],valorizacion().map(x=>[x.p.nombre,x.p.categoria,x.l.nro,x.l.venc,x.stock,x.l.costo,x.valor]))}
+
+/* ---------- Configuración ---------- */
+function openConfig(){
+  openModal('Configuración','<div class="form"><label>Criterio de salida<select name="criterio"><option value="FEFO"'+(DB.cfg.criterio==='FEFO'?' selected':'')+'>FEFO · primero el que vence antes</option><option value="FIFO"'+(DB.cfg.criterio==='FIFO'?' selected':'')+'>FIFO · primero el que entró antes</option></select></label><label>Alertar vencimientos a (días)<input name="diasAlerta" type="number" min="1" value="'+DB.cfg.diasAlerta+'"></label></div>'+
+   '<hr style="border-color:var(--line);margin:18px 0"><div class="bar"><button type="button" class="btn" onclick="exportJson()">⬇ Respaldo (JSON)</button><label class="btn">⬆ Restaurar<input type="file" accept=".json" hidden onchange="importJson(this.files[0])"></label><button type="button" class="btn danger" onclick="if(confirm(\'Se borran los cambios y se vuelve a los datos de ejemplo. ¿Seguir?\')){closeModal();seed();cart=[];draft=null;render();toast(\'Datos de demo restablecidos\')}">Restablecer datos de demo</button></div><p class="mut small">Demo: los datos viven sólo en este navegador (localStorage).</p>',
+   d=>{DB.cfg.criterio=d.criterio;DB.cfg.diasAlerta=Math.max(1,Number(d.diasAlerta)||60);save();toast('Configuración guardada');render()});
+}
+function exportJson(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(DB)],{type:'application/json'}));a.download='lubricentro_maxi_respaldo_'+hoy()+'.json';a.click()}
+function importJson(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.productos||!d.lotes||!d.movimientos)throw 0;DB=d;save();closeModal();render();toast('Respaldo restaurado')}catch(e){toast('Archivo inválido',true)}};r.readAsText(f)}
+
+/* ---------- arranque ---------- */
+load();
+{const h=location.hash.slice(1);if(VIEWS.some(x=>x[0]===h))view=h}
+render();
+</script>
+</body>
+</html>
