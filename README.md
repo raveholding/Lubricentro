@@ -1,4 +1,4 @@
-# Lubricentro Maxi · Stock y Trazabilidad (demo HTML5)
+# Lubricentro Salta · Stock y Trazabilidad (demo HTML5)
 
 Prototipo funcional de gestión de stock por lotes para un lubricentro (sin taller ni turnos).
 Abrí `index.html` en el navegador: no necesita servidor. Los datos de ejemplo se guardan en `localStorage`

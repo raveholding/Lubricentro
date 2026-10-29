@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Lubricentro Maxi · Stock y Trazabilidad</title>
+<title>Lubricentro Salta · Stock y Trazabilidad</title>
 <style>
 :root{--bg:#121417;--panel:#1b1e23;--panel2:#242830;--line:#2f343d;--tx:#eceef1;--mut:#9aa2ae;--acc:#f5b301;--acc2:#ffcf4d;--ok:#3fbf7f;--warn:#f5a623;--bad:#ef5350;--info:#4aa3ff;--r:10px}
 *{box-sizing:border-box}
@@ -95,11 +95,11 @@ dialog::backdrop{background:#000a}
 
 <script>
 /* =====================================================================
-   LUBRICENTRO MAXI · Sistema de Stock y Trazabilidad (demo HTML5)
+   LUBRICENTRO SALTA · Sistema de Stock y Trazabilidad (demo HTML5)
    Datos en localStorage. Modelo equivalente a schema.sql.
    Desarrollado por VINCULAR BUSINESS · (387) 4484132 · vincularbusiness@gmail.com
    ===================================================================== */
-const LS='lubricentro_maxi_v1';
+const LS='lubricentro_salta_v1';
 let DB=null;
 
 /* ---------- utilidades ---------- */
@@ -280,7 +280,7 @@ function valorizacion(){
    DATOS DE DEMO
    ===================================================================== */
 function seed(){
-  DB={cfg:{criterio:'FEFO',diasAlerta:60,nombre:'Lubricentro Maxi'},seq:{},
+  DB={cfg:{criterio:'FEFO',diasAlerta:60,nombre:'Lubricentro Salta'},seq:{},
     categorias:['Aceites','Filtros','Aditivos','Refrigerantes','Líquidos de freno','Grasas','Limpieza'],
     unidades:['Un','Lt','Kg','Bidón','Pack'],
     productos:[],proveedores:[],compras:[],compraItems:[],lotes:[],movimientos:[],ventas:[],ventaItems:[]};
@@ -358,7 +358,7 @@ window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(VIEW
 
 function renderNav(){
   const al=calcAlertas();const n=totalAlertas(al);
-  $('#nav').innerHTML='<div class="brand"><div class="logo">M</div><div><b>Lubricentro Maxi</b><small>Stock y trazabilidad</small></div></div>'+
+  $('#nav').innerHTML='<div class="brand"><div class="logo">S</div><div><b>Lubricentro Salta</b><small>Stock y trazabilidad</small></div></div>'+
    VIEWS.map(([k,t])=>'<a class="'+(k===view?'on':'')+'" onclick="go(\''+k+'\')">'+t+(k==='alertas'&&n?'<span class="cnt">'+n+'</span>':'')+'</a>').join('')+
    '<div class="sp"></div><a onclick="openConfig()">⚙ Configuración</a>'+
    '<div class="credits">Desarrollado por <b>VINCULAR BUSINESS</b><br>(387) 4484132<br>vincularbusiness@gmail.com<br><i>Tu idea, en buenas manos.</i></div>';
@@ -635,8 +635,8 @@ function movFiltrados(){
   const f=flt.mov;
   return DB.movimientos.filter(m=>{const l=byId(DB.lotes,m.loteId);return(!f.desde||m.fecha.slice(0,10)>=f.desde)&&(!f.hasta||m.fecha.slice(0,10)<=f.hasta)&&(!f.prod||m.productoId===Number(f.prod))&&(!f.tipo||m.tipo===f.tipo)&&(!f.lote||l.nro.toLowerCase().includes(f.lote.toLowerCase()))}).sort((a,b)=>b.fecha<a.fecha?-1:b.fecha>a.fecha?1:b.id-a.id);
 }
-function expMov(){downloadCsv('movimientos_lubricentro_maxi.csv',['Fecha','Tipo','Producto','Lote','Cantidad','Costo unit.','Valor','Referencia'],movFiltrados().map(m=>[fdt(m.fecha),TIPOS_MOV[m.tipo],byId(DB.productos,m.productoId).nombre,byId(DB.lotes,m.loteId).nro,m.cant,m.costo,r3(m.cant*m.costo),m.nota]))}
-function expVal(){downloadCsv('valorizacion_lubricentro_maxi.csv',['Producto','Categoría','Lote','Vencimiento','Stock','Costo','Valor'],valorizacion().map(x=>[x.p.nombre,x.p.categoria,x.l.nro,x.l.venc,x.stock,x.l.costo,x.valor]))}
+function expMov(){downloadCsv('movimientos_lubricentro_salta.csv',['Fecha','Tipo','Producto','Lote','Cantidad','Costo unit.','Valor','Referencia'],movFiltrados().map(m=>[fdt(m.fecha),TIPOS_MOV[m.tipo],byId(DB.productos,m.productoId).nombre,byId(DB.lotes,m.loteId).nro,m.cant,m.costo,r3(m.cant*m.costo),m.nota]))}
+function expVal(){downloadCsv('valorizacion_lubricentro_salta.csv',['Producto','Categoría','Lote','Vencimiento','Stock','Costo','Valor'],valorizacion().map(x=>[x.p.nombre,x.p.categoria,x.l.nro,x.l.venc,x.stock,x.l.costo,x.valor]))}
 
 /* ---------- Configuración ---------- */
 function openConfig(){
@@ -644,7 +644,7 @@ function openConfig(){
    '<hr style="border-color:var(--line);margin:18px 0"><div class="bar"><button type="button" class="btn" onclick="exportJson()">⬇ Respaldo (JSON)</button><label class="btn">⬆ Restaurar<input type="file" accept=".json" hidden onchange="importJson(this.files[0])"></label><button type="button" class="btn danger" onclick="if(confirm(\'Se borran los cambios y se vuelve a los datos de ejemplo. ¿Seguir?\')){closeModal();seed();cart=[];draft=null;render();toast(\'Datos de demo restablecidos\')}">Restablecer datos de demo</button></div><p class="mut small">Demo: los datos viven sólo en este navegador (localStorage).</p>',
    d=>{DB.cfg.criterio=d.criterio;DB.cfg.diasAlerta=Math.max(1,Number(d.diasAlerta)||60);save();toast('Configuración guardada');render()});
 }
-function exportJson(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(DB)],{type:'application/json'}));a.download='lubricentro_maxi_respaldo_'+hoy()+'.json';a.click()}
+function exportJson(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(DB)],{type:'application/json'}));a.download='lubricentro_salta_respaldo_'+hoy()+'.json';a.click()}
 function importJson(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.productos||!d.lotes||!d.movimientos)throw 0;DB=d;save();closeModal();render();toast('Respaldo restaurado')}catch(e){toast('Archivo inválido',true)}};r.readAsText(f)}
 
 /* ---------- arranque ---------- */

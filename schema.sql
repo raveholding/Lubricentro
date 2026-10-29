@@ -1,5 +1,5 @@
 -- =====================================================================
--- LUBRICENTRO MAXI · Stock y trazabilidad por lotes
+-- LUBRICENTRO SALTA · Stock y trazabilidad por lotes
 -- Esquema relacional (PostgreSQL). La demo HTML usa el mismo modelo en memoria.
 -- Principio: el stock NO se guarda; se obtiene sumando el libro de movimientos.
 -- Desarrollado por VINCULAR BUSINESS · (387) 4484132 · vincularbusiness@gmail.com
